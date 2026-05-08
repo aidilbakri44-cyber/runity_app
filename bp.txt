@@ -1,0 +1,35 @@
+BLUEPRINT PENGEMBANGAN APLIKASI RUNITY (MODERN RUNNING APP)
+==========================================================
+
+1. INFORMASI PROYEK
+-------------------
+Nama Aplikasi   : Runity
+Platform        : Flutter (Android & iOS)
+Target Pengguna : Pelari kasual hingga profesional (Masyarakat Modern)
+Fokus Utama     : Akurasi Data, Komunitas, dan Gamifikasi
+
+2. ARSITEKTUR TEKNIS (TECH STACK)
+---------------------------------
+- Framework: Flutter (Dart)
+- State Management: Riverpod (untuk manajemen data sensor yang kompleks)
+- Database: 
+    * Local: Hive (Cepat, NoSQL) untuk caching rute lari secara real-time.
+    * Remote: Supabase (Auth, Database, Cloud Storage).
+- Map Engine: Google Maps SDK.
+- Background Task: flutter_background_service & geolocator.
+- Health Integration: Health Kit (iOS) & Google Fit (Android).
+
+3. MODUL FITUR LENGKAP & MODERN
+-------------------------------
+- REAL-TIME GPS TRACKING: Akurasi tinggi dengan filter jarak.
+- SMART DASHBOARD: Metrik besar, glassmorphism UI, progress gamifikasi.
+- LIVE MAP: Visualisasi rute lari dengan polyline neon.
+- AUTOMATIC SYNC: Sinkronisasi data ke cloud.
+
+STATUS PENGEMBANGAN:
+[X] Core Architecture (Riverpod & Hive)
+[X] Premium UI Design System (Dark Mode, Glassmorphism)
+[X] Dashboard Module
+[X] Core Tracking Module (GPS & Timer)
+[ ] Social & Community Module
+[ ] Gamification & Rewards
