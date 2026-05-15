@@ -39,10 +39,11 @@ class AppTranslations {
       'biometric_auth': 'Security Lock',
       'fingerprint': 'Fingerprint',
       'face_id': 'FaceID / TouchID',
+      'profile_updated': 'Profile photo updated!',
     },
     'Bahasa Indonesia': {
       'hello': 'Halo',
-      'ready_to_run': 'Siap untuk Lari?',
+      'ready_to_run': 'Siap untuk jadi lebih sehat?',
       'total_distance': 'Total Jarak',
       'runs': 'Lari',
       'streak': 'Beruntun',
@@ -79,6 +80,7 @@ class AppTranslations {
       'biometric_auth': 'Kunci Keamanan',
       'fingerprint': 'Sidik Jari',
       'face_id': 'FaceID / TouchID',
+      'profile_updated': 'Foto profil diperbarui!',
     }
   };
 

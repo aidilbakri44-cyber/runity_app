@@ -1,14 +1,18 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
-import '../providers/profile_provider.dart';
 import '../../../tracking/presentation/providers/history_provider.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
 import '../../../../core/localization/app_translations.dart';
+import '../providers/profile_provider.dart';
 import 'edit_profile_page.dart';
+import 'welcome_page.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -23,49 +27,111 @@ class ProfilePage extends ConsumerWidget {
     String t(String key) => AppTranslations.translate(lang, key);
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
-        child: CustomScrollView(
-          slivers: [
-            _buildSliverAppBar(context, profile),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  children: [
-                    _buildMainStats(history, t),
-                    const SizedBox(height: 32),
-                    _buildAchievements(history, t),
-                    const SizedBox(height: 32),
-                    _buildSettingsItem(context, t('edit_profile'), FontAwesomeIcons.userPen, () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()));
-                    }),
-                    _buildSettingsItem(context, t('privacy_settings'), FontAwesomeIcons.shieldHalved, () {
-                      _showInfoSnackBar(context, "Privacy Settings loaded.");
-                    }),
-                    _buildSettingsItem(context, t('notifications'), FontAwesomeIcons.bell, () {
-                      _showInfoSnackBar(context, "Notification preferences loaded.");
-                    }),
-                    const SizedBox(height: 40),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: Text(t('logout'), style: const TextStyle(color: Colors.white)),
+      backgroundColor: AppColors.background,
+      body: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(context, profile, ref),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildMainStats(history, t)
+                    .animate()
+                    .fadeIn(duration: 600.ms)
+                    .slideY(begin: 0.1, end: 0),
+                  const SizedBox(height: 32),
+                  Text(
+                    t('account').toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
                     ),
-                  ],
-                ),
+                  ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
+                  const SizedBox(height: 16),
+                  _buildSettingsItem(context, t('edit_profile'), FontAwesomeIcons.userPen, () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const EditProfilePage()));
+                  }).animate().fadeIn(delay: 400.ms),
+                  _buildSettingsItem(context, t('privacy_settings'), FontAwesomeIcons.shieldHalved, () {
+                    _showInfoSnackBar(context, "Privacy Settings loaded.");
+                  }).animate().fadeIn(delay: 500.ms),
+                  _buildSettingsItem(context, t('notifications'), FontAwesomeIcons.bell, () {
+                    _showInfoSnackBar(context, "Notification preferences loaded.");
+                  }).animate().fadeIn(delay: 600.ms),
+                  const SizedBox(height: 40),
+                  ElevatedButton(
+                    onPressed: () => _showLogoutDialog(context, ref, t),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      minimumSize: const Size(double.infinity, 54),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      t('logout'), 
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.5)
+                    ),
+                  ).animate().fadeIn(delay: 800.ms).scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1)),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, profile) {
+  void _showLogoutDialog(BuildContext context, WidgetRef ref, Function(String) t) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Row(
+          children: [
+            FaIcon(FontAwesomeIcons.arrowRightFromBracket, color: AppColors.accent, size: 20),
+            SizedBox(width: 12),
+            Text("Logout", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Text(
+          "Apakah Anda ingin keluar? Seluruh data sesi lokal Anda akan diatur ulang.",
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("TIDAK", style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              await ref.read(profileProvider.notifier).logout();
+              
+              if (context.mounted) {
+                // Navigate back to WelcomePage and clear the stack
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomePage()),
+                  (route) => false,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text("YA, KELUAR", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSliverAppBar(BuildContext context, profile, WidgetRef ref) {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
@@ -76,7 +142,7 @@ class ProfilePage extends ConsumerWidget {
           fit: StackFit.expand,
           children: [
             Image.network(
-              "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=1000",
+              "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=1200",
               fit: BoxFit.cover,
             ),
             Container(
@@ -89,34 +155,65 @@ class ProfilePage extends ConsumerWidget {
               ),
             ),
             Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullScreenImagePage(imageUrl: profile.avatarUrl),
-                    ),
-                  );
-                },
-                child: Hero(
-                  tag: "profile_avatar",
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 40),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primary, width: 4),
-                      boxShadow: [
-                        BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 30),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundImage: profile.avatarUrl.startsWith('http')
-                          ? NetworkImage(profile.avatarUrl)
-                          : FileImage(File(profile.avatarUrl)) as ImageProvider,
+              child: Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FullScreenImagePage(imageUrl: profile.avatarUrl),
+                        ),
+                      );
+                    },
+                    child: Hero(
+                      tag: "profile_avatar",
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 40),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.primary, width: 4),
+                          boxShadow: [
+                            BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 30),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            color: AppColors.surface,
+                            child: profile.avatarUrl.isEmpty
+                                ? const Icon(Icons.person, color: Colors.white, size: 40)
+                                : (kIsWeb 
+                                    ? Image.network(profile.avatarUrl, fit: BoxFit.cover)
+                                    : Image.file(File(profile.avatarUrl), fit: BoxFit.cover)),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    bottom: 48,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () => _pickImageFromGallery(context, ref),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.4),
+                              blurRadius: 10,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.edit, color: Colors.black, size: 18),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -125,7 +222,31 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMainStats(List<RunActivity> history, Function(String) t) {
+  Future<void> _pickImageFromGallery(BuildContext context, WidgetRef ref) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 600,
+      maxHeight: 600,
+      imageQuality: 85,
+    );
+
+    if (image != null) {
+      ref.read(profileProvider.notifier).updateAvatar(image.path);
+      final settings = ref.read(settingsProvider);
+      final message = AppTranslations.translate(settings.language, 'profile_updated');
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Widget _buildMainStats(List<Activity> history, Function(String) t) {
     double totalDistance = history.fold(0, (sum, run) => sum + run.distance);
     int totalRuns = history.length;
     
@@ -146,64 +267,17 @@ class ProfilePage extends ConsumerWidget {
           children: [
             FaIcon(icon, color: AppColors.primary, size: 20),
             const SizedBox(height: 12),
-            Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildAchievements(List<RunActivity> history, Function(String) t) {
-    double totalDistance = history.fold(0, (sum, run) => sum + run.distance);
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(t('achievements'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 100,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildBadge(FontAwesomeIcons.trophy, "Early Bird", history.isNotEmpty),
-              _buildBadge(FontAwesomeIcons.medal, "10K Club", totalDistance >= 10),
-              _buildBadge(FontAwesomeIcons.award, "Streak King", history.length >= 3),
-              _buildBadge(FontAwesomeIcons.rankingStar, "Elite", totalDistance >= 50),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBadge(IconData icon, String label, bool isUnlocked) {
-    return Container(
-      width: 80,
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isUnlocked ? AppColors.surface : AppColors.surface.withOpacity(0.3),
-              shape: BoxShape.circle,
-              border: Border.all(color: isUnlocked ? AppColors.primary : Colors.white.withOpacity(0.05)),
-            ),
-            child: FaIcon(
-              icon, 
-              color: isUnlocked ? Colors.amber : Colors.grey.withOpacity(0.3), 
-              size: 24
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label, 
-            style: TextStyle(fontSize: 10, color: isUnlocked ? Colors.white : Colors.grey), 
-            textAlign: TextAlign.center
-          ),
-        ],
       ),
     );
   }

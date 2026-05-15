@@ -19,9 +19,22 @@ class AppColors {
   static const Color primary = Color(0xFF00FF88); // Cyber Green
   static const Color secondary = Color(0xFF00E5FF); // Electric Blue
   static const Color accent = Color(0xFFFF2D55); // Neon Pink
+  static const Color darkGrey = Color(0xFF1A1A1A);
   
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primary, secondary],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient darkGradient = LinearGradient(
+    colors: [Color(0xFF0F0F0F), Color(0xFF1A1A1A)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static const LinearGradient surfaceGradient = LinearGradient(
+    colors: [Color(0xFF1E1E1E), Color(0xFF121212)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

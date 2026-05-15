@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 import '../../domain/models/tracking_state.dart';
 
 import 'history_provider.dart';
@@ -113,6 +113,7 @@ class TrackingNotifier extends StateNotifier<TrackingState> {
         duration: state.duration,
         pace: state.formattedPace,
         type: state.activityType,
+        route: List.from(state.route),
       ));
     }
     

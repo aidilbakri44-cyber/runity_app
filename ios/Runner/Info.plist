@@ -66,5 +66,17 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Runity needs access to your location to track your runs and activities on the map.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Runity needs access to your location to track your runs and activities even when the app is in the background.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Runity needs access to your location to track your runs and activities.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Runity needs access to your photo library to let you choose a profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Runity needs access to your camera to let you take a profile picture.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Runity needs access to your microphone.</string>
 </dict>
 </plist>

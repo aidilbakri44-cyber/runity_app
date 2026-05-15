@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -15,6 +16,7 @@ class EditProfilePage extends ConsumerStatefulWidget {
 
 class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   late TextEditingController _nameController;
+  late TextEditingController _bioController;
   String? _localImagePath;
   final ImagePicker _picker = ImagePicker();
 
@@ -23,11 +25,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     super.initState();
     final profile = ref.read(profileProvider);
     _nameController = TextEditingController(text: profile.name);
+    _bioController = TextEditingController(text: profile.bio);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
@@ -126,25 +130,55 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               onTap: _showPickerOptions,
               child: Stack(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primary, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.2),
-                          blurRadius: 20,
-                          spreadRadius: 4,
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.primary, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.2),
+                            blurRadius: 20,
+                            spreadRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Container(
+                          color: AppColors.surface,
+                          child: _localImagePath != null
+                              ? (kIsWeb
+                                  ? Image.network(
+                                      _localImagePath!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.person, color: Colors.white, size: 40),
+                                    )
+                                  : Image.file(
+                                      File(_localImagePath!),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.person, color: Colors.white, size: 40),
+                                    ))
+                              : profile.avatarUrl.isEmpty
+                                  ? const Icon(Icons.person, color: Colors.white, size: 40)
+                                  : (kIsWeb)
+                                      ? Image.network(
+                                          profile.avatarUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.person, color: Colors.white, size: 40),
+                                        )
+                                      : Image.file(
+                                          File(profile.avatarUrl),
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.person, color: Colors.white, size: 40),
+                                        ),
                         ),
-                      ],
+                      ),
                     ),
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundImage: _localImagePath != null
-                          ? FileImage(File(_localImagePath!))
-                          : NetworkImage(profile.avatarUrl) as ImageProvider,
-                    ),
-                  ),
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -179,9 +213,35 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               controller: _nameController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: "Display Name",
+                labelText: "Nama Tampilan",
                 labelStyle: const TextStyle(color: AppColors.primary),
                 prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                ),
+                filled: true,
+                fillColor: AppColors.surface,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Bio field
+            TextField(
+              controller: _bioController,
+              style: const TextStyle(color: Colors.white),
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: "Biodata / Tentang Saya",
+                labelStyle: const TextStyle(color: AppColors.primary),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(bottom: 40),
+                  child: Icon(Icons.info_outline, color: AppColors.primary),
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
@@ -203,15 +263,17 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
               child: ElevatedButton(
                 onPressed: () {
                   final notifier = ref.read(profileProvider.notifier);
-                  notifier.updateName(_nameController.text);
-                  if (_localImagePath != null) {
-                    notifier.updateAvatar(_localImagePath!);
-                  }
+                  notifier.updateProfile(
+                    name: _nameController.text,
+                    bio: _bioController.text,
+                    avatarUrl: _localImagePath,
+                  );
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text("Profil berhasil diperbarui!"),
                       backgroundColor: AppColors.primary,
+                      behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },

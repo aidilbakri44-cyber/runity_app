@@ -4,32 +4,60 @@ BLUEPRINT PENGEMBANGAN APLIKASI RUNITY (MODERN RUNNING APP)
 1. INFORMASI PROYEK
 -------------------
 Nama Aplikasi   : Runity
-Platform        : Flutter (Android & iOS)
+Platform        : Flutter (Android, iOS, & Web Support)
 Target Pengguna : Pelari kasual hingga profesional (Masyarakat Modern)
-Fokus Utama     : Akurasi Data, Komunitas, dan Gamifikasi
+Fokus Utama     : Akurasi Data, Pengalaman Visual Premium, dan Personalisasi
 
 2. ARSITEKTUR TEKNIS (TECH STACK)
 ---------------------------------
 - Framework: Flutter (Dart)
-- State Management: Riverpod (untuk manajemen data sensor yang kompleks)
+- State Management: Riverpod (Reactive state handling)
 - Database: 
-    * Local: Hive (Cepat, NoSQL) untuk caching rute lari secara real-time.
-    * Remote: Supabase (Auth, Database, Cloud Storage).
-- Map Engine: Google Maps SDK.
-- Background Task: flutter_background_service & geolocator.
-- Health Integration: Health Kit (iOS) & Google Fit (Android).
+    * Local: Hive (NoSQL) - Sangat cepat untuk menyimpan koordinat GPS.
+- Map Engine: Flutter Map (OpenStreetMap) - Fleksibel & Bebas API Key.
+- Lokalisasi: Custom AppTranslations (Support Bahasa Indonesia & English).
+- Animasi: flutter_animate (Framer-motion style effects).
+- Social: share_plus (Integrasi berbagi ke media sosial).
 
-3. MODUL FITUR LENGKAP & MODERN
--------------------------------
-- REAL-TIME GPS TRACKING: Akurasi tinggi dengan filter jarak.
-- SMART DASHBOARD: Metrik besar, glassmorphism UI, progress gamifikasi.
-- LIVE MAP: Visualisasi rute lari dengan polyline neon.
-- AUTOMATIC SYNC: Sinkronisasi data ke cloud.
+3. MODUL FITUR TERIMPLEMENTASI (LATEST)
+---------------------------------------
+- SMART DASHBOARD:
+    * Dynamic Mesh Gradient Background dengan Moving Radial Glow.
+    * Live Run Card: Memantau lari aktif langsung dari halaman utama.
+    * Last Run Reference: Akses cepat ke detail aktivitas terakhir.
+    
+- ADVANCED TRACKING SYSTEM:
+    * Dynamic UI Morphing: Panel statistik berubah menjadi bar horizontal (lanskap) saat peta diperbesar.
+    * Real-time Metrics: Jarak, Waktu, Pace, dan Kalori.
+    * Full Map Mode: Visualisasi rute penuh tanpa gangguan panel besar.
 
-STATUS PENGEMBANGAN:
+- PERSONALIZED PROFILE:
+    * Custom Bio: Pengguna dapat menambahkan biodata diri.
+    * Photo Integration: Ganti foto profil (Web & Mobile compatible).
+    * Security: Logout dengan dialog konfirmasi & reset data lokal otomatis.
+
+- ACTIVITY HISTORY:
+    * Detail View: Lihat rute lari lama dengan fitur Toggle Panel statistik.
+    * Social Share: Bagikan ringkasan lari ke Instagram/WhatsApp/Twitter.
+
+5. RENCANA FITUR SOSIAL (FUTURE)
+--------------------------------
+- PROFILE STORIES: Fitur berbagi momen lari singkat (foto/video 24 jam) ala Instagram.
+- ATHLETE CHAT: Sistem pesan instan terintegrasi untuk diskusi rute atau janjian lari ala WhatsApp.
+- SOCIAL NETWORK: Sistem pertemanan (Following/Followers) untuk membangun komunitas atlet ala Instagram.
+
+6. STATUS PENGEMBANGAN:
 [X] Core Architecture (Riverpod & Hive)
-[X] Premium UI Design System (Dark Mode, Glassmorphism)
-[X] Dashboard Module
-[X] Core Tracking Module (GPS & Timer)
-[ ] Social & Community Module
-[ ] Gamification & Rewards
+[X] Premium UI Design System (Mesh Gradients, Glow Effects)
+[X] Dashboard Module & Live Run Tracking
+[X] Core Tracking Module (Adaptive UI & GPS)
+[X] Profile & Personalization Module
+[X] Social Sharing Integration
+[ ] Social Network & Stories (Future)
+[ ] Real-time Athlete Chat (Future)
+[ ] Gamification & Rewards (Leaderboard, Medals)
+[ ] AI Run Coach (Personalized training plans)
+
+CATATAN TEKNIS:
+- Kompatibilitas Web sudah dioptimalkan untuk penanganan gambar (Image.network vs Image.file).
+- Sistem tema menggunakan kustom palet AppColors untuk konsistensi visual neon-dark.
