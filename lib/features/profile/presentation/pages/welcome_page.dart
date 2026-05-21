@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/profile_provider.dart';
-import '../../../dashboard/presentation/pages/dashboard_page.dart';
+import '../../../dashboard/presentation/pages/main_navigation_shell.dart';
 
 class WelcomePage extends ConsumerStatefulWidget {
   const WelcomePage({super.key});
@@ -48,9 +48,9 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       notifier.updateAvatar(_localImagePath!);
     }
 
-    // Navigate to Dashboard
+    // Navigate to Main Navigation Shell
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => DashboardPage()),
+      MaterialPageRoute(builder: (context) => const MainNavigationShell()),
     );
   }
 

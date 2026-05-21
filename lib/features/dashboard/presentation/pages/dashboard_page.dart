@@ -178,14 +178,7 @@ class DashboardPage extends ConsumerWidget {
                     .fadeIn(delay: 900.ms)
                     .slideY(begin: 0.1, end: 0),
                 
-                const SizedBox(height: 16),
-                _buildStartButton(context, t)
-                  .animate(onPlay: (controller) => controller.repeat())
-                  .shimmer(duration: 2.seconds, color: Colors.white24)
-                  .animate()
-                  .fadeIn(delay: 1000.ms)
-                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutBack),
-                const SizedBox(height: 24),
+                const SizedBox(height: 100),
               ],
             ),
           ),
@@ -200,37 +193,11 @@ class DashboardPage extends ConsumerWidget {
       children: [
         Row(
           children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primary, width: 2),
-                ),
-                child: ClipOval(
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    color: AppColors.surface,
-                    child: profile.avatarUrl.isEmpty
-                        ? const Icon(Icons.person, color: Colors.white, size: 20)
-                        : (kIsWeb 
-                                ? Image.network(profile.avatarUrl, fit: BoxFit.cover)
-                                : Image.file(File(profile.avatarUrl), fit: BoxFit.cover)),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${t('hello')}, ${profile.name.split(' ')[0]}!",
+                  "${t('hello')}, ${profile.name}!",
                   style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ),
                 Text(

@@ -75,6 +75,7 @@ class ProfilePage extends ConsumerWidget {
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.5)
                     ),
                   ).animate().fadeIn(delay: 800.ms).scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1)),
+                  const SizedBox(height: 100),
                 ],
               ),
             ),

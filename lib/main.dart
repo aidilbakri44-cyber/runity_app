@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/theme/app_theme.dart';
-import 'features/dashboard/presentation/pages/dashboard_page.dart';
+import 'features/dashboard/presentation/pages/main_navigation_shell.dart';
 import 'features/profile/presentation/pages/welcome_page.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
 
@@ -32,7 +32,7 @@ class RunityApp extends ConsumerWidget {
       title: 'Runity',
       debugShowCheckedModeBanner: false,
       theme: (settings.darkMode == true) ? AppTheme.darkTheme : AppTheme.lightTheme,
-      home: profile.isSetup ? DashboardPage() : WelcomePage(),
+      home: profile.isSetup ? const MainNavigationShell() : const WelcomePage(),
     );
   }
 }
