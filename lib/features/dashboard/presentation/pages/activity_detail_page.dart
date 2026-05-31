@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -142,7 +143,10 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
 
   Widget _buildStatsPanel(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.72,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -154,75 +158,213 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    DateFormat('EEEE, MMM d, yyyy').format(widget.activity.date),
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FaIcon(widget.activity.type.icon, color: AppColors.primary, size: 20),
-                      const SizedBox(width: 12),
-                      Text(
-                        widget.activity.type.name.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
+                      if (widget.activity.title != null && widget.activity.title!.isNotEmpty) ...[
+                        Text(
+                          widget.activity.title!,
+                          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                         ),
+                        const SizedBox(height: 4),
+                      ],
+                      Text(
+                        DateFormat('EEEE, MMM d, yyyy').format(widget.activity.date),
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          FaIcon(widget.activity.type.icon, color: AppColors.primary, size: 14),
+                          const SizedBox(width: 8),
+                          Text(
+                            widget.activity.type.name.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-              GestureDetector(
-                onTap: _shareActivity,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: _shareActivity,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                    ),
+                    child: const FaIcon(FontAwesomeIcons.shareNodes, color: AppColors.primary, size: 20),
                   ),
-                  child: const FaIcon(FontAwesomeIcons.shareNodes, color: AppColors.primary, size: 20),
+                ),
+              ],
+            ),
+            
+            // Photo display
+            if (widget.activity.photoPath != null) ...[
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.file(
+                  File(widget.activity.photoPath!),
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink();
+                  },
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatItem("DISTANCE", widget.activity.distance.toStringAsFixed(2), "km"),
-              _buildStatItem("DURATION", _formatDuration(widget.activity.duration), "min"),
-              _buildStatItem("AVG PACE", widget.activity.pace, "/km"),
-            ],
-          ),
-          const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.surface,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+
+            // Custom description/how did it go
+            if (widget.activity.description != null && widget.activity.description!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                ),
+                child: Text(
+                  widget.activity.description!,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14, fontStyle: FontStyle.italic, height: 1.4),
+                ),
               ),
-              child: const Text("CLOSE", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+            ],
+
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildStatItem("DISTANCE", widget.activity.distance.toStringAsFixed(2), "km"),
+                _buildStatItem("DURATION", _formatDuration(widget.activity.duration), "min"),
+                _buildStatItem("AVG PACE", widget.activity.pace, "/km"),
+              ],
             ),
-          ),
-        ],
+
+            // Additional details (chips for run type and feeling)
+            if ((widget.activity.runType != null && widget.activity.runType!.isNotEmpty) ||
+                (widget.activity.feeling != null && widget.activity.feeling!.isNotEmpty)) ...[
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  if (widget.activity.runType != null && widget.activity.runType!.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.directions_run, color: AppColors.primary, size: 12),
+                          const SizedBox(width: 6),
+                          Text(
+                            widget.activity.runType!,
+                            style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  if (widget.activity.feeling != null && widget.activity.feeling!.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.sentiment_satisfied_alt, color: AppColors.secondary, size: 12),
+                          const SizedBox(width: 6),
+                          Text(
+                            widget.activity.feeling!,
+                            style: const TextStyle(color: AppColors.secondary, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+
+            // Private Notes
+            if (widget.activity.privateNotes != null && widget.activity.privateNotes!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.02),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.04)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.lock_outline, color: Colors.white38, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Catatan Pribadi",
+                            style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.activity.privateNotes!,
+                            style: const TextStyle(color: Colors.white70, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.surface,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text("CLOSE", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

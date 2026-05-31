@@ -9,6 +9,7 @@ import '../providers/tracking_provider.dart';
 import '../../domain/models/tracking_state.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
 import '../../../../core/localization/app_translations.dart';
+import 'save_activity_page.dart';
 
 class TrackingPage extends ConsumerStatefulWidget {
   const TrackingPage({super.key});
@@ -208,7 +209,13 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                       GestureDetector(
                         onTap: () {
                           if (isRunning) notifier.pauseTracking();
-                          _showSummaryDialog(context, state, notifier, (k) => k);
+                          notifier.stopTracking(saveToHistory: false);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SaveActivityPage(),
+                            ),
+                          );
                         },
                         child: Container(
                           padding: const EdgeInsets.all(10),
@@ -532,8 +539,13 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
                           opacity: state.status == TrackingStatus.paused ? 1.0 : 0.2,
                           child: GestureDetector(
                             onTap: state.status == TrackingStatus.paused ? () {
-                              notifier.stopTracking();
-                              _showSummaryDialog(context, state, notifier, (k) => k);
+                              notifier.stopTracking(saveToHistory: false);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SaveActivityPage(),
+                                ),
+                              );
                             } : null,
                             child: Container(
                               width: 48, height: 48,
@@ -845,8 +857,13 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
         if (isSmall) const SizedBox(width: 12),
         GestureDetector(
           onTap: () {
-            notifier.stopTracking();
-            _showSummaryDialog(context, state, notifier, t);
+            notifier.stopTracking(saveToHistory: false);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SaveActivityPage(),
+              ),
+            );
           },
           child: Container(
             width: isSmall ? 40 : 60,
@@ -859,35 +876,4 @@ class _TrackingPageState extends ConsumerState<TrackingPage> {
     );
   }
 
-  void _showSummaryDialog(BuildContext context, TrackingState state, TrackingNotifier notifier, Function(String) t) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(t('run_completed'), textAlign: TextAlign.center, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FaIcon(FontAwesomeIcons.trophy, color: Colors.amber, size: 48),
-            const SizedBox(height: 24),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(t('distance')), Text(state.formattedDistance, style: const TextStyle(fontWeight: FontWeight.bold))]),
-            const SizedBox(height: 8),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(t('duration')), Text(state.formattedDuration, style: const TextStyle(fontWeight: FontWeight.bold))]),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              notifier.reset();
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: Text(t('awesome'), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
 }

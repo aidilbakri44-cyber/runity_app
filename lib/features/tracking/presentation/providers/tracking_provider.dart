@@ -102,11 +102,11 @@ class TrackingNotifier extends StateNotifier<TrackingState> {
     state = state.copyWith(status: TrackingStatus.running);
   }
 
-  void stopTracking() {
+  void stopTracking({bool saveToHistory = false}) {
     _timer?.cancel();
     _positionStream?.cancel();
     
-    if (state.distance > 0) {
+    if (saveToHistory && state.distance > 0) {
       _historyNotifier.addActivity(Activity(
         date: DateTime.now(),
         distance: state.distance / 1000,

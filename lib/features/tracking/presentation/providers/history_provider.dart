@@ -38,6 +38,12 @@ class Activity {
   final String pace;
   final SportType type;
   final List<LatLng> route;
+  final String? title;
+  final String? description;
+  final String? runType;
+  final String? feeling;
+  final String? privateNotes;
+  final String? photoPath;
 
   Activity({
     required this.date,
@@ -46,6 +52,12 @@ class Activity {
     required this.pace,
     this.type = SportType.run,
     this.route = const [],
+    this.title,
+    this.description,
+    this.runType,
+    this.feeling,
+    this.privateNotes,
+    this.photoPath,
   });
 }
 
