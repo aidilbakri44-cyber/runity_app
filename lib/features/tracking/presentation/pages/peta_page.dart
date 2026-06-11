@@ -7,7 +7,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
-import '../../../../core/localization/app_translations.dart';
 
 class PetaPage extends ConsumerStatefulWidget {
   const PetaPage({super.key});

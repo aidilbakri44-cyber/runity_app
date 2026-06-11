@@ -5,8 +5,8 @@ import 'core/theme/app_theme.dart';
 import 'features/dashboard/presentation/pages/main_navigation_shell.dart';
 import 'features/profile/presentation/pages/welcome_page.dart';
 import 'features/profile/presentation/providers/profile_provider.dart';
-
 import 'features/settings/presentation/providers/settings_provider.dart';
+import 'shared/widgets/responsive_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +32,9 @@ class RunityApp extends ConsumerWidget {
       title: 'Runity',
       debugShowCheckedModeBanner: false,
       theme: (settings.darkMode == true) ? AppTheme.darkTheme : AppTheme.lightTheme,
+      builder: (context, child) {
+        return ResponsiveWrapper(child: child!);
+      },
       home: profile.isSetup ? const MainNavigationShell() : const WelcomePage(),
     );
   }

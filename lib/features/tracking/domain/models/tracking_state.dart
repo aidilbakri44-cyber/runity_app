@@ -13,6 +13,9 @@ class TrackingState {
   final List<LatLng> route;
   final LatLng? lastPosition;
   final SportType activityType;
+  final bool autoPause;
+  final bool audioCues;
+  final int heartRate;
 
   TrackingState({
     this.status = TrackingStatus.idle,
@@ -23,6 +26,9 @@ class TrackingState {
     this.route = const [],
     this.lastPosition,
     this.activityType = SportType.run,
+    this.autoPause = false,
+    this.audioCues = false,
+    this.heartRate = 0,
   });
 
   TrackingState copyWith({
@@ -34,6 +40,9 @@ class TrackingState {
     List<LatLng>? route,
     LatLng? lastPosition,
     SportType? activityType,
+    bool? autoPause,
+    bool? audioCues,
+    int? heartRate,
   }) {
     return TrackingState(
       status: status ?? this.status,
@@ -44,6 +53,9 @@ class TrackingState {
       route: route ?? this.route,
       lastPosition: lastPosition ?? this.lastPosition,
       activityType: activityType ?? this.activityType,
+      autoPause: autoPause ?? this.autoPause,
+      audioCues: audioCues ?? this.audioCues,
+      heartRate: heartRate ?? this.heartRate,
     );
   }
   

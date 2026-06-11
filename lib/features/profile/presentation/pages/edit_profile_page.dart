@@ -1,10 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/image_helper.dart';
 import '../providers/profile_provider.dart';
 
 class EditProfilePage extends ConsumerStatefulWidget {
@@ -148,34 +147,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                         child: Container(
                           color: AppColors.surface,
                           child: _localImagePath != null
-                              ? (kIsWeb
-                                  ? Image.network(
-                                      _localImagePath!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.person, color: Colors.white, size: 40),
-                                    )
-                                  : Image.file(
-                                      File(_localImagePath!),
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.person, color: Colors.white, size: 40),
-                                    ))
+                              ? ImageHelper.imageFromPath(_localImagePath!)
                               : profile.avatarUrl.isEmpty
                                   ? const Icon(Icons.person, color: Colors.white, size: 40)
-                                  : (kIsWeb)
-                                      ? Image.network(
-                                          profile.avatarUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                              const Icon(Icons.person, color: Colors.white, size: 40),
-                                        )
-                                      : Image.file(
-                                          File(profile.avatarUrl),
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                              const Icon(Icons.person, color: Colors.white, size: 40),
-                                        ),
+                                  : ImageHelper.imageFromPath(profile.avatarUrl),
                         ),
                       ),
                     ),

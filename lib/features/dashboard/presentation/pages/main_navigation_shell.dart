@@ -1,13 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'dashboard_page.dart';
-import '../../../tracking/presentation/pages/peta_page.dart';
-import '../../../tracking/presentation/pages/rekam_page.dart';
-import 'grup_page.dart';
+import '../../../tracking/presentation/pages/activity_history_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
 
@@ -28,9 +24,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     super.initState();
     _pages = [
       const DashboardPage(),
-      const PetaPage(),
-      const RekamPage(),
-      const GrupPage(),
+      const ActivityHistoryPage(),
       const ProfilePage(),
     ];
   }
@@ -44,261 +38,71 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
-    final lang = settings.language;
-    final isIndo = lang == 'Bahasa Indonesia';
+    final isIndo = settings.language == 'Bahasa Indonesia';
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Keeping state of all pages alive with IndexedStack
-          IndexedStack(
-            index: _currentIndex,
-            children: _pages,
-          ),
-
-          // Floating Glassmorphic Bottom Navigation Bar
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 24,
-            child: _buildFloatingBottomNavBar(context, isIndo),
-          ),
-        ],
+      backgroundColor: const Color(0xFF161618),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
       ),
-    );
-  }
-
-  Widget _buildFloatingBottomNavBar(BuildContext context, bool isIndo) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          height: 76,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.65),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.08),
-              width: 1.5,
+      bottomNavigationBar: Container(
+        height: 80,
+        decoration: const BoxDecoration(
+          color: Color(0xFF1E1E22), // Flat dark color from the image bottom nav
+          border: Border(
+            top: BorderSide(
+              color: Color(0xFF2A2A30),
+              width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                index: 0,
-                icon: FontAwesomeIcons.house,
-                label: isIndo ? "Home" : "Home",
-                hasBadge: true,
-                badgeValue: "7",
-              ),
-              _buildNavItem(
-                index: 1,
-                icon: FontAwesomeIcons.map,
-                label: isIndo ? "Peta" : "Map",
-              ),
-              _buildCenterNavItem(
-                index: 2,
-                label: isIndo ? "Rekam" : "Record",
-              ),
-              _buildNavItem(
-                index: 3,
-                icon: FontAwesomeIcons.peopleGroup,
-                label: isIndo ? "Grup" : "Groups",
-              ),
-              _buildNavItem(
-                index: 4,
-                icon: FontAwesomeIcons.chartSimple,
-                label: isIndo ? "Anda" : "You",
-              ),
-            ],
           ),
         ),
-      ),
-    ).animate().fadeIn(duration: 800.ms).slideY(begin: 0.2, end: 0, curve: Curves.easeOutBack);
-  }
-
-  Widget _buildNavItem({
-    required int index,
-    required IconData icon,
-    required String label,
-    bool hasBadge = false,
-    String badgeValue = "",
-  }) {
-    final isSelected = _currentIndex == index;
-    final activeColor = AppColors.primary;
-    final inactiveColor = Colors.white.withOpacity(0.4);
-
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _onTabTapped(index),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // Icon
-                AnimatedScale(
-                  duration: const Duration(milliseconds: 250),
-                  scale: isSelected ? 1.2 : 1.0,
-                  child: FaIcon(
-                    icon,
-                    color: isSelected ? activeColor : inactiveColor,
-                    size: 20,
-                  ),
-                ),
-                // Notification Badge
-                if (hasBadge)
-                  Positioned(
-                    right: -10,
-                    top: -8,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Center(
-                        child: Text(
-                          badgeValue,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ).animate(onPlay: (c) => c.repeat(reverse: true))
-                     .scale(begin: const Offset(0.9, 0.9), end: const Offset(1.15, 1.15), duration: 1.seconds),
-                  ),
+                _buildNavItem(0, Icons.grid_view_outlined, isIndo ? "Dash" : "Dash"),
+                _buildNavItem(1, Icons.history, isIndo ? "Riwayat" : "History"),
+                _buildNavItem(2, Icons.person_outline, isIndo ? "Profil" : "Profile"),
               ],
             ),
-            const SizedBox(height: 6),
-            // Text Label
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? activeColor : inactiveColor,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Dot indicator
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: isSelected ? 4 : 0,
-              height: isSelected ? 4 : 0,
-              decoration: BoxDecoration(
-                color: activeColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: activeColor.withOpacity(0.8),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCenterNavItem({
-    required int index,
-    required String label,
-  }) {
+  Widget _buildNavItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;
-    final activeColor = AppColors.primary;
-    final inactiveColor = Colors.white.withOpacity(0.4);
+    final activeColor = const Color(0xFF00E5FF); // Cyan from the image
+    final inactiveColor = Colors.white54;
 
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _onTabTapped(index),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Custom Double-Circle Record Button
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? activeColor : Colors.white.withOpacity(0.5),
-                  width: 2.5,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: activeColor.withOpacity(0.3),
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Center(
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? activeColor : Colors.white.withOpacity(0.8),
-                  ),
-                ).animate(target: isSelected ? 1 : 0, onPlay: (c) => c.repeat(reverse: true))
-                 .scale(begin: const Offset(0.85, 0.85), end: const Offset(1.15, 1.15), duration: 1.seconds),
-              ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _onTabTapped(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? activeColor : inactiveColor,
+            size: 24,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: isSelected ? activeColor : inactiveColor,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              letterSpacing: 0.5,
             ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? activeColor : inactiveColor,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Dot indicator
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: isSelected ? 4 : 0,
-              height: isSelected ? 4 : 0,
-              decoration: BoxDecoration(
-                color: activeColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: activeColor.withOpacity(0.8),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

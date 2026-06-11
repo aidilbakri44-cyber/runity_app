@@ -1,14 +1,11 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
-import '../../../../core/localization/app_translations.dart';
+import '../../../../core/utils/image_helper.dart';
 
 class GrupPage extends ConsumerStatefulWidget {
   const GrupPage({super.key});
@@ -320,9 +317,7 @@ class _GrupPageState extends ConsumerState<GrupPage> with SingleTickerProviderSt
                     child: ClipOval(
                       child: avatar.isEmpty
                           ? Container(color: Colors.white10, child: const Icon(Icons.person, color: Colors.white70, size: 18))
-                          : (avatar.startsWith('http')
-                              ? Image.network(avatar, fit: BoxFit.cover)
-                              : Image.file(File(avatar), fit: BoxFit.cover)),
+                          : ImageHelper.imageFromPath(avatar, fit: BoxFit.cover),
                     ),
                   ),
                 ],

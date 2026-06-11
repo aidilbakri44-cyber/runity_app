@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:share_plus/share_plus.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:ui' as ui;
@@ -29,21 +28,6 @@ class SaveSuccessCardPage extends StatelessWidget {
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds.remainder(60);
     return "${minutes}m ${seconds}d";
-  }
-
-  void _shareActivity() {
-    final distStr = _formatDistanceComma(activity.distance);
-    final paceStr = _formatPaceColon(activity.pace);
-    final durationStr = _formatDurationShort(activity.duration);
-    final title = activity.title ?? activity.type.name;
-
-    final text =
-        '🏃 $title\n'
-        '📍 Jarak: $distStr km\n'
-        '⚡ Pace: $paceStr /km\n'
-        '⏱️ Waktu: $durationStr\n\n'
-        'Dilacak dengan Runity 💚';
-    Share.share(text);
   }
 
   @override
@@ -91,22 +75,41 @@ class SaveSuccessCardPage extends StatelessWidget {
                     const Spacer(flex: 1),
 
                     // Route drawing area
-                    SizedBox(
-                      width: double.infinity,
-                      height: 280,
-                      child: CustomPaint(
-                        painter: RoutePainter(
-                          route: activity.route,
-                          routeColor: AppColors.primary, // Cyber Green
-                          strokeWidth: 4.5,
+                    if (activity.route.isNotEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 280,
+                        child: CustomPaint(
+                          painter: RoutePainter(
+                            route: activity.route,
+                            routeColor: AppColors.primary, // Cyber Green
+                            strokeWidth: 4.5,
+                          ),
                         ),
-                      ),
-                    ).animate().fadeIn(duration: 800.ms).scale(
-                      begin: const Offset(0.9, 0.9),
-                      end: const Offset(1, 1),
-                      curve: Curves.easeOutBack,
-                      duration: 600.ms,
-                    ),
+                      ).animate().fadeIn(duration: 800.ms).scale(
+                        begin: const Offset(0.9, 0.9),
+                        end: const Offset(1, 1),
+                        curve: Curves.easeOutBack,
+                        duration: 600.ms,
+                      )
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        height: 280,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.map_outlined, color: Colors.white.withOpacity(0.1), size: 80),
+                              const SizedBox(height: 16),
+                              Text(
+                                "Tidak ada rute",
+                                style: TextStyle(color: Colors.white.withOpacity(0.3), fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ).animate().fadeIn(duration: 800.ms),
 
                     const Spacer(flex: 1),
 
@@ -154,33 +157,7 @@ class SaveSuccessCardPage extends StatelessWidget {
 
                     const Spacer(flex: 2),
 
-                    // Share button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton.icon(
-                        onPressed: _shareActivity,
-                        icon: const Icon(Icons.share, size: 20),
-                        label: const Text(
-                          'Bagikan Aktivitas',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ).animate().fadeIn(delay: 1000.ms).slideY(begin: 0.2, end: 0),
 
-                    const SizedBox(height: 12),
 
                     // Back to dashboard button
                     SizedBox(

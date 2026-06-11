@@ -44,6 +44,7 @@ class Activity {
   final String? feeling;
   final String? privateNotes;
   final String? photoPath;
+  final int heartRate;
 
   Activity({
     required this.date,
@@ -58,6 +59,7 @@ class Activity {
     this.feeling,
     this.privateNotes,
     this.photoPath,
+    this.heartRate = 0,
   });
 }
 

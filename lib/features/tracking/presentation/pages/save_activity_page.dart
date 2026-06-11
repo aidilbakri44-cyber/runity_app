@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,11 +5,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_translations.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
+import '../../../../core/utils/image_helper.dart';
 import '../providers/tracking_provider.dart';
 import '../providers/history_provider.dart';
 import 'save_success_card_page.dart';
@@ -149,6 +148,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error picking image: $e')),
       );
@@ -163,8 +163,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
 
   Future<bool> _onWillPop() async {
     final settings = ref.read(settingsProvider);
-    final isIndo = settings.language == 'Bahasa Indonesia';
-    final t = (String key) => AppTranslations.translate(settings.language, key);
+    String t(String key) => AppTranslations.translate(settings.language, key);
 
     final result = await showDialog<bool>(
       context: context,
@@ -201,11 +200,10 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
   void _saveActivity() {
     final trackingState = ref.read(trackingProvider);
     
-    // We enforce that the distance is saved. In case it is mock tracking with 0 meters, we mock a distance.
-    final finalDistance = trackingState.distance > 0 ? trackingState.distance / 1000 : 3.42; 
-    final finalDuration = trackingState.duration > Duration.zero ? trackingState.duration : const Duration(minutes: 18, seconds: 24);
-    final finalPace = trackingState.distance > 0 ? trackingState.formattedPace : "5'22\"";
-    final finalRoute = trackingState.route.isNotEmpty ? trackingState.route : _mockRoute;
+    final finalDistance = trackingState.distance / 1000; // in km
+    final finalDuration = trackingState.duration;
+    final finalPace = trackingState.formattedPace;
+    final finalRoute = trackingState.route;
 
     final newActivity = Activity(
       date: DateTime.now(),
@@ -220,6 +218,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
       feeling: _selectedFeeling,
       privateNotes: _privateNotesController.text.trim(),
       photoPath: _pickedImagePath,
+      heartRate: trackingState.heartRate,
     );
 
     // Save to history
@@ -251,21 +250,30 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
     String t(String key) => AppTranslations.translate(settings.language, key);
     final trackingState = ref.watch(trackingProvider);
 
-    final orangeThemeColor = const Color(0xFFFF5722); // Premium deep orange matching screenshot
-    final formFieldBorderColor = Colors.white.withOpacity(0.08);
+    final cyanThemeColor = const Color(0xFF00E5FF);
+    final orangeThemeColor = const Color(0xFF00A2FF); // Blue for photo and map buttons
+    final fieldBgColor = const Color(0xFF1C1C1E); // Darker grey for fields
+    final formFieldBorderColor = Colors.transparent;
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF121212),
         appBar: AppBar(
-          backgroundColor: Colors.black,
+          backgroundColor: const Color(0xFF121212),
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () async {
               final shouldPop = await _onWillPop();
-              if (shouldPop && mounted) {
+              if (shouldPop && context.mounted) {
                 Navigator.of(context).pop();
               }
             },
@@ -280,7 +288,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
               child: Text(
                 t('save'),
                 style: TextStyle(
-                  color: orangeThemeColor,
+                  color: cyanThemeColor,
                   fontWeight: FontWeight.w900,
                   fontSize: 16,
                   letterSpacing: 0.5,
@@ -304,7 +312,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                       : t('title_placeholder_generic'),
                   hintStyle: const TextStyle(color: Colors.white38, fontSize: 16),
                   filled: true,
-                  fillColor: const Color(0xFF121212),
+                  fillColor: fieldBgColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -312,7 +320,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: orangeThemeColor),
+                    borderSide: BorderSide(color: cyanThemeColor),
                   ),
                 ),
               ),
@@ -327,7 +335,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                   hintText: t('desc_placeholder'),
                   hintStyle: const TextStyle(color: Colors.white30, fontSize: 14, height: 1.4),
                   filled: true,
-                  fillColor: const Color(0xFF121212),
+                  fillColor: fieldBgColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -335,7 +343,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: orangeThemeColor),
+                    borderSide: BorderSide(color: cyanThemeColor),
                   ),
                 ),
               ),
@@ -347,7 +355,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF121212),
+                    color: fieldBgColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: formFieldBorderColor),
                   ),
@@ -355,7 +363,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                     children: [
                       FaIcon(
                         _selectedSport?.icon ?? FontAwesomeIcons.personRunning,
-                        color: Colors.white,
+                        color: cyanThemeColor,
                         size: 18,
                       ),
                       const SizedBox(width: 12),
@@ -405,7 +413,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                                 polylines: [
                                   Polyline(
                                     points: trackingState.route.isNotEmpty ? trackingState.route : _mockRoute,
-                                    color: orangeThemeColor,
+                                    color: cyanThemeColor,
                                     strokeWidth: 4,
                                   ),
                                 ],
@@ -442,7 +450,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                       child: Container(
                         height: 150,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF121212),
+                          color: fieldBgColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Stack(
@@ -483,8 +491,8 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                                 child: Stack(
                                   fit: StackFit.expand,
                                   children: [
-                                    Image.file(
-                                      File(_pickedImagePath!),
+                                    ImageHelper.imageFromPath(
+                                      _pickedImagePath!,
                                       fit: BoxFit.cover,
                                     ),
                                     // Remove button overlay
@@ -535,7 +543,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                       Icon(Icons.layers_outlined, color: orangeThemeColor, size: 18),
                       const SizedBox(width: 8),
                       Text(
-                        "${t('change_map_type')} (${_mapStyles[_currentMapStyleIndex]['name']})",
+                        t('change_map_type'),
                         style: TextStyle(color: orangeThemeColor, fontSize: 13, fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -561,16 +569,16 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF121212),
+                    color: fieldBgColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: formFieldBorderColor),
                   ),
                   child: Row(
                     children: [
-                      const FaIcon(
-                        FontAwesomeIcons.personRunning,
+                      const Icon(
+                        Icons.chevron_right,
                         color: Colors.white54,
-                        size: 16,
+                        size: 20,
                       ),
                       const SizedBox(width: 12),
                       Text(
@@ -594,7 +602,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF121212),
+                    color: fieldBgColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: formFieldBorderColor),
                   ),
@@ -630,7 +638,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                   hintStyle: const TextStyle(color: Colors.white30, fontSize: 14),
                   prefixIcon: const Icon(Icons.lock_outline, color: Colors.white54, size: 18),
                   filled: true,
-                  fillColor: const Color(0xFF121212),
+                  fillColor: fieldBgColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -638,7 +646,7 @@ class _SaveActivityPageState extends ConsumerState<SaveActivityPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: orangeThemeColor),
+                    borderSide: BorderSide(color: cyanThemeColor),
                   ),
                 ),
               ),

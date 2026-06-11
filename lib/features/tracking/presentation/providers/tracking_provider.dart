@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:latlong2/latlong.dart';
+import 'dart:math' as math;
 import '../../domain/models/tracking_state.dart';
 
 import 'history_provider.dart';
@@ -19,9 +21,17 @@ class TrackingNotifier extends StateNotifier<TrackingState> {
   Timer? _timer;
 
   Future<void> startTracking() async {
+    state = state.copyWith(status: TrackingStatus.running);
+    _startTimer();
+
+    if (kIsWeb) {
+      _startSimulation();
+      return;
+    }
+
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled
+      _startSimulation();
       return;
     }
 
@@ -29,16 +39,22 @@ class TrackingNotifier extends StateNotifier<TrackingState> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        _startSimulation();
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      _startSimulation();
       return;
     }
 
-    state = state.copyWith(status: TrackingStatus.running);
-    _startTimer();
+    try {
+      final initialPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      _updateLocation(initialPosition);
+    } catch (e) {
+      // Ignored, stream will catch it later
+    }
 
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
@@ -47,6 +63,46 @@ class TrackingNotifier extends StateNotifier<TrackingState> {
       ),
     ).listen((Position position) {
       _updateLocation(position);
+    });
+  }
+
+  void _startSimulation() {
+    _positionStream?.cancel();
+    
+    // Initial dummy position (Jakarta)
+    LatLng currentPos = const LatLng(-6.200000, 106.816666);
+    if (state.lastPosition != null) {
+      currentPos = state.lastPosition!;
+    }
+    
+    // Simulate walking/running
+    Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (state.status != TrackingStatus.running) {
+        timer.cancel();
+        return;
+      }
+      
+      final speed = state.activityType == SportType.cycle ? 0.00015 : 0.00005;
+      final newLat = currentPos.latitude + (math.Random().nextDouble() - 0.2) * speed;
+      final newLng = currentPos.longitude + (math.Random().nextDouble() - 0.2) * speed;
+      
+      currentPos = LatLng(newLat, newLng);
+      
+      // Mock a Position object
+      final mockPosition = Position(
+        longitude: currentPos.longitude,
+        latitude: currentPos.latitude,
+        timestamp: DateTime.now(),
+        accuracy: 5.0,
+        altitude: 10.0,
+        altitudeAccuracy: 1.0,
+        heading: 0.0,
+        headingAccuracy: 1.0,
+        speed: speed * 100000,
+        speedAccuracy: 1.0,
+      );
+      
+      _updateLocation(mockPosition);
     });
   }
 
@@ -98,7 +154,11 @@ class TrackingNotifier extends StateNotifier<TrackingState> {
 
   void resumeTracking() {
     _startTimer();
-    _positionStream?.resume();
+    if (_positionStream != null && _positionStream!.isPaused) {
+      _positionStream!.resume();
+    } else if (kIsWeb || _positionStream == null) {
+      _startSimulation();
+    }
     state = state.copyWith(status: TrackingStatus.running);
   }
 
@@ -122,6 +182,14 @@ class TrackingNotifier extends StateNotifier<TrackingState> {
 
   void setActivityType(SportType type) {
     state = state.copyWith(activityType: type);
+  }
+
+  void setSettings({bool? autoPause, bool? audioCues}) {
+    state = state.copyWith(autoPause: autoPause, audioCues: audioCues);
+  }
+
+  void setHeartRate(int bpm) {
+    state = state.copyWith(heartRate: bpm);
   }
 
   void reset() {

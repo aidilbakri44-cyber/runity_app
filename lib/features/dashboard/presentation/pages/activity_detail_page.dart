@@ -1,12 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/image_helper.dart';
 import '../../../tracking/presentation/providers/history_provider.dart';
 
 class ActivityDetailPage extends StatefulWidget {
@@ -221,14 +220,13 @@ class _ActivityDetailPageState extends State<ActivityDetailPage> {
               const SizedBox(height: 16),
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.file(
-                  File(widget.activity.photoPath!),
+                child: SizedBox(
                   height: 180,
                   width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink();
-                  },
+                  child: ImageHelper.imageFromPath(
+                    widget.activity.photoPath!,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ],

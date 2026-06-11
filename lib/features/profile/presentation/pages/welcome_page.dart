@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/image_helper.dart';
 import '../providers/profile_provider.dart';
 import '../../../dashboard/presentation/pages/main_navigation_shell.dart';
 
@@ -192,8 +192,8 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                             child: Container(
                               color: AppColors.surface,
                               child: _localImagePath != null
-                                  ? Image.file(
-                                      File(_localImagePath!),
+                                  ? ImageHelper.imageFromPath(
+                                      _localImagePath!,
                                       fit: BoxFit.cover,
                                     )
                                   : const Icon(Icons.person, color: Colors.white, size: 50),

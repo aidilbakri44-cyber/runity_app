@@ -72,21 +72,26 @@ class SettingsPage extends ConsumerWidget {
               icon: FontAwesomeIcons.heartPulse,
               title: t('heart_rate'),
               value: settings.heartRateConnected ? "Connected" : "Disconnected",
-              onTap: () {},
+              onTap: () => notifier.toggleHeartRate(),
             ),
             const SizedBox(height: 32),
             _buildSectionTitle(t('account')),
             _buildSettingTile(
               icon: FontAwesomeIcons.cloudArrowUp,
               title: t('auto_sync'),
-              value: "Enabled",
-              onTap: () {},
+              value: settings.autoSync ? "Enabled" : "Disabled",
+              onTap: () => notifier.toggleAutoSync(),
             ),
             _buildSettingTile(
               icon: FontAwesomeIcons.trashCan,
               title: t('clear_cache'),
-              value: "124 MB",
-              onTap: () {},
+              value: settings.cacheSize,
+              onTap: () {
+                notifier.clearCache();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Cache Cleared!"), backgroundColor: AppColors.primary),
+                );
+              },
             ),
           ],
         ),

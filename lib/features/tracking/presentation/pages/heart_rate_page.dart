@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../domain/services/heart_rate_service.dart';
 
 class HeartRatePage extends StatefulWidget {
   const HeartRatePage({super.key});
@@ -261,7 +259,7 @@ class _HeartRatePageState extends State<HeartRatePage>
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () => Navigator.pop(context, _done ? _bpm : null),
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -521,16 +519,7 @@ class _HeartRatePageState extends State<HeartRatePage>
           ),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: () {
-              setState(() {
-                _done = false;
-                _bpm = 0;
-                _progress = 0;
-                _ticks = 0;
-                _bpmReadings.clear();
-                _fingerPresent = false;
-              });
-            },
+            onTap: () => Navigator.pop(context, _done ? _bpm : null),
             child: Container(
               width: double.infinity,
               height: 44,
@@ -549,7 +538,7 @@ class _HeartRatePageState extends State<HeartRatePage>
               ),
               child: const Center(
                 child: Text(
-                  "UKUR ULANG",
+                  "SIMPAN & KEMBALI",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -558,6 +547,23 @@ class _HeartRatePageState extends State<HeartRatePage>
                   ),
                 ),
               ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _done = false;
+                _bpm = 0;
+                _progress = 0;
+                _ticks = 0;
+                _bpmReadings.clear();
+                _fingerPresent = false;
+              });
+            },
+            child: const Text(
+              "Ukur Ulang",
+              style: TextStyle(color: Colors.white54, fontSize: 12, decoration: TextDecoration.underline),
             ),
           ),
         ],
